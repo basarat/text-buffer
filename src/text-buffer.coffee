@@ -5,7 +5,6 @@ Serializable = require 'serializable'
 {Subscriber} = require 'emissary'
 EmitterMixin = require('emissary').Emitter
 {Emitter, CompositeDisposable} = require 'event-kit'
-{File} = require 'pathwatcher'
 SpanSkipList = require 'span-skip-list'
 diff = require 'atom-diff'
 Q = require 'q'
