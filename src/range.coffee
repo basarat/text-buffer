@@ -17,6 +17,15 @@ Point = require './point'
 # ```
 module.exports =
 class Range
+  ###
+  Section: Properties
+  ###
+
+  # Public: A {Point} representing the start of the {Range}.
+  start: null
+
+  # Public: A {Point} representing the end of the {Range}.
+  end: null
 
   ###
   Section: Construction
@@ -83,7 +92,7 @@ class Range
 
   # Public: Call this with the result of {Range::serialize} to construct a new Range.
   #
-  # * `array` {array} of params to pass to the {::constructor}
+  # * `array` {Array} of params to pass to the {::constructor}
   @deserialize: (array) ->
     if Array.isArray(array)
       new this(array[0], array[1])
@@ -99,6 +108,9 @@ class Range
   # * `pointA` {Point} or Point compatible {Array} (default: [0,0])
   # * `pointB` {Point} or Point compatible {Array} (default: [0,0])
   constructor: (pointA = new Point(0, 0), pointB = new Point(0, 0)) ->
+    unless this instanceof Range
+      return new Range(pointA, pointB)
+
     pointA = Point.fromObject(pointA)
     pointB = Point.fromObject(pointB)
 
@@ -194,11 +206,6 @@ class Range
   traverse: (delta) ->
     new @constructor(@start.traverse(delta), @end.traverse(delta))
 
-  # Deprecated
-  add: (delta) ->
-    Grim.deprecate("Use Range::traverse instead")
-    @traverse(delta)
-
   ###
   Section: Comparison
   ###
@@ -264,7 +271,7 @@ class Range
   #   endpoints. Defaults to false.
   containsPoint: (point, exclusive) ->
     # Deprecated: Support options hash with exclusive
-    if exclusive? and typeof exclusive is 'object'
+    if Grim.includeDeprecatedAPIs and exclusive? and typeof exclusive is 'object'
       Grim.deprecate("The second param is no longer an object, it's a boolean argument named `exclusive`.")
       {exclusive} = exclusive
 
@@ -290,6 +297,9 @@ class Range
     [startRow, endRow] = [endRow, startRow] if startRow > endRow
     @end.row >= startRow and endRow >= @start.row
 
+  getExtent: ->
+    @end.traversalFrom(@start)
+
   ###
   Section: Conversion
   ###
@@ -305,3 +315,8 @@ class Range
   # Public: Returns a string representation of the range.
   toString: ->
     "[#{@start} - #{@end}]"
+
+if Grim.includeDeprecatedAPIs
+  Range::add = (delta) ->
+    Grim.deprecate("Use Range::traverse instead")
+    @traverse(delta)
